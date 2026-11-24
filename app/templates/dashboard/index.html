@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Welcome Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">Welcome back, {{ current_user.full_name }}</h2>
+      <p class="text-muted small mb-0"><i class="bi bi-mortarboard me-1"></i> {{ current_user.college_name }} &bull; @{{ current_user.username }}</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('books.create') }}" class="btn btn-bookloop-accent d-flex align-items-center gap-2">
+        <i class="bi bi-plus-lg"></i> List a Book
+      </a>
+      <a href="{{ url_for('books.browse') }}" class="btn btn-bookloop-secondary">
+        Browse Books
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Overview Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-primary">{{ my_books_count }}</div>
+          <div class="metric-label">My Books Listed</div>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--blue-50); color: var(--blue-600); width: 48px; height: 48px;">
+          <i class="bi bi-book fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number {{ 'text-danger' if pending_incoming_count > 0 else 'text-dark' }}">{{ pending_incoming_count }}</div>
+          <div class="metric-label">Requests Received</div>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--amber-50); color: var(--amber-600); width: 48px; height: 48px;">
+          <i class="bi bi-inbox fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-dark">{{ sent_requests_count }}</div>
+          <div class="metric-label">Requests Sent</div>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--teal-50); color: var(--teal-600); width: 48px; height: 48px;">
+          <i class="bi bi-send fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-success">{{ total_completed }}</div>
+          <div class="metric-label">Completed Deals</div>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--emerald-50); color: var(--emerald-600); width: 48px; height: 48px;">
+          <i class="bi bi-check2-circle fs-5"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Urgent Action Banner if Pending Requests Exist -->
+  {% if urgent_incoming %}
+    <div class="alert alert-warning p-4 rounded-4 shadow-sm mb-4 border">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bell-fill text-warning me-2"></i> Action Required: Pending Requests</h5>
+        <a href="{{ url_for('dashboard.incoming_requests') }}" class="btn btn-sm btn-dark">View All Requests</a>
+      </div>
+      <p class="text-secondary small mb-3">You have received requests from campus peers awaiting your response:</p>
+      <div class="row g-2">
+        {% for req in urgent_incoming %}
+          <div class="col-md-4">
+            <div class="bg-white p-3 rounded-3 border">
+              <span class="badge bg-secondary mb-1">{{ req.request_type | capitalize }}</span>
+              <div class="fw-bold text-dark text-truncate">{{ req.book.title }}</div>
+              <div class="small text-muted">From {{ req.requester.full_name }}</div>
+              <div class="d-flex gap-2 mt-2">
+                <form method="POST" action="{{ url_for('requests.accept_request', request_id=req.id) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                  <button type="submit" class="btn btn-sm btn-success py-0 px-2">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('requests.reject_request', request_id=req.id) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Decline</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Quick Navigation Grid -->
+  <div class="row g-4 mb-4">
+    <!-- Left Column: Navigation Quick links -->
+    <div class="col-lg-4">
+      <div class="card card-bookloop p-3 mb-4">
+        <h6 class="fw-bold text-dark mb-3">Dashboard Hub</h6>
+        <div class="list-group list-group-flush small">
+          <a href="{{ url_for('dashboard.my_listings') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-1">
+            <span><i class="bi bi-journal-text me-2 text-primary"></i> My Listed Books</span>
+            <span class="badge bg-light text-dark border">{{ active_listings_count }} active</span>
+          </a>
+          <a href="{{ url_for('dashboard.incoming_requests') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-1">
+            <span><i class="bi bi-inbox me-2 text-primary"></i> Incoming Requests</span>
+            {% if pending_incoming_count > 0 %}
+              <span class="badge bg-danger">{{ pending_incoming_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('dashboard.sent_requests') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-1">
+            <span><i class="bi bi-send me-2 text-primary"></i> Sent Requests</span>
+            <span class="badge bg-light text-dark border">{{ sent_requests_count }}</span>
+          </a>
+          <a href="{{ url_for('dashboard.wishlist') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-1">
+            <span><i class="bi bi-heart me-2 text-danger"></i> Saved Wishlist</span>
+            <span class="badge bg-light text-dark border">{{ wishlist_count }}</span>
+          </a>
+          <a href="{{ url_for('auth.profile') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-1">
+            <span><i class="bi bi-gear me-2 text-secondary"></i> Account Profile</span>
+            <i class="bi bi-chevron-right text-muted"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Campus exchange guidelines -->
+      <div class="card card-bookloop p-4 text-center">
+        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: var(--emerald-50); color: var(--emerald-600);">
+          <i class="bi bi-handshake fs-5"></i>
+        </div>
+        <h6 class="fw-bold text-dark mb-1">Campus Exchange Policy</h6>
+        <p class="small text-muted mb-0">Always arrange book handoffs at public daylight locations on your campus such as the library lobby or university student union.</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Recent Activity Feed -->
+    <div class="col-lg-8">
+      <div class="card card-bookloop p-4 h-100">
+        <h5 class="fw-bold text-dark mb-3">Recent Activity Timeline</h5>
+
+        {% if recent_activities %}
+          <div class="timeline mt-2">
+            {% for act in recent_activities %}
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="fw-semibold text-dark small">{{ act.description }}</div>
+                <div class="text-muted small">{{ act.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-clock-history fs-2 d-block mb-2"></i>
+            <p class="small mb-0">No recent activity recorded yet. Start by listing a book or browsing the catalog!</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

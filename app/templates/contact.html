@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Campus Support – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-bookloop p-4 p-md-5">
+        <span class="brand-icon mb-2"><i class="bi bi-chat-dots"></i></span>
+        <h2 class="fw-bold text-dark mb-2">Campus Support & Inquiries</h2>
+        <p class="text-muted small mb-4">
+          Need assistance with your BookLoop account, want to report a campus issue, or bring BookLoop to your university student union? Reach out below.
+        </p>
+
+        <div class="row g-4 mb-4">
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border h-100">
+              <div class="fw-bold text-dark mb-1"><i class="bi bi-envelope-at text-primary me-2"></i>Email Support</div>
+              <div class="text-muted small">support@bookloop.edu</div>
+              <small class="text-secondary d-block mt-1">Student team replies within 24 hours.</small>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border h-100">
+              <div class="fw-bold text-dark mb-1"><i class="bi bi-mortarboard text-primary me-2"></i>Campus Representatives</div>
+              <div class="text-muted small">reps@bookloop.edu</div>
+              <small class="text-secondary d-block mt-1">Join our ambassador network on your campus.</small>
+            </div>
+          </div>
+        </div>
+
+        <form onsubmit="alert('Thank you! Your message has been received by our student support team.'); return false;">
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold text-secondary">Your Name</label>
+              <input type="text" class="form-control" required placeholder="Alex Rivera">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label small fw-semibold text-secondary">College / University</label>
+              <input type="text" class="form-control" required placeholder="University Name">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Email Address</label>
+            <input type="email" class="form-control" required placeholder="alex@campus.edu">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Subject</label>
+            <input type="text" class="form-control" required placeholder="Question about campus book exchange...">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-secondary">Message</label>
+            <textarea class="form-control" rows="4" required placeholder="How can we assist you?"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-bookloop-primary px-4">
+            Send Message
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

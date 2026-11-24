@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied (403) – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      <div class="p-5 bg-white rounded-4 border card-bookloop shadow-sm">
+        <div class="display-1 fw-bold text-warning mb-3">403</div>
+        <h3 class="fw-bold text-dark mb-2">Access Denied</h3>
+        <p class="text-muted small mb-4">
+          You do not have administrative permission or ownership credentials to access this area or resource.
+        </p>
+        <div class="d-flex justify-content-center gap-2">
+          <a href="{{ url_for('main.index') }}" class="btn btn-bookloop-primary">
+            <i class="bi bi-house me-1"></i> Return Home
+          </a>
+          <a href="{{ url_for('dashboard.index') }}" class="btn btn-bookloop-secondary">
+            <i class="bi bi-speedometer2 me-1"></i> Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

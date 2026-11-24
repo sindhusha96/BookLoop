@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Admin Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-danger rounded-pill px-3 py-1">Administrator Control Panel</span>
+      </div>
+      <h2 class="fw-bold text-dark mb-0">Platform Overview & Moderation</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-people me-1"></i> Manage Users
+      </a>
+      <a href="{{ url_for('admin.books') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-book me-1"></i> Manage Listings
+      </a>
+      <a href="{{ url_for('admin.reports') }}" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-flag me-1"></i> Reports
+        {% if pending_reports > 0 %}
+          <span class="badge bg-danger ms-1">{{ pending_reports }}</span>
+        {% endif %}
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Overview Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-primary">{{ total_users }}</div>
+          <div class="metric-label">Total Users</div>
+          <small class="text-muted">+{{ new_users_month }} past 30 days</small>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--blue-50); color: var(--blue-600); width: 48px; height: 48px;">
+          <i class="bi bi-people fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-dark">{{ total_books }}</div>
+          <div class="metric-label">Total Books Listed</div>
+          <small class="text-success">{{ active_listings }} currently active</small>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--teal-50); color: var(--teal-600); width: 48px; height: 48px;">
+          <i class="bi bi-journal-bookmark fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number text-success">{{ completed_exchanges }}</div>
+          <div class="metric-label">Completed Deals</div>
+          <small class="text-muted">{{ pending_requests }} pending requests</small>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--emerald-50); color: var(--emerald-600); width: 48px; height: 48px;">
+          <i class="bi bi-arrow-repeat fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-3">
+      <div class="metric-card">
+        <div>
+          <div class="metric-number {{ 'text-danger' if pending_reports > 0 else 'text-muted' }}">{{ pending_reports }}</div>
+          <div class="metric-label">Pending Reports</div>
+          <small class="text-muted">{{ total_reports }} total reports</small>
+        </div>
+        <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" style="background: var(--rose-50); color: var(--rose-600); width: 48px; height: 48px;">
+          <i class="bi bi-shield-exclamation fs-5"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Top Academic Disciplines -->
+    <div class="col-lg-6">
+      <div class="card card-bookloop p-4 h-100">
+        <h5 class="fw-bold text-dark mb-3">Top Disciplines by Listings</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light small">
+              <tr>
+                <th>Department</th>
+                <th class="text-end">Books Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dept, cnt in departments %}
+                <tr>
+                  <td class="fw-semibold text-dark">{{ dept }}</td>
+                  <td class="text-end"><span class="badge bg-light text-dark border">{{ cnt }}</span></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="2" class="text-muted small">No department data available.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Book Condition Distribution -->
+    <div class="col-lg-6">
+      <div class="card card-bookloop p-4 h-100">
+        <h5 class="fw-bold text-dark mb-3">Listing Condition Distribution</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light small">
+              <tr>
+                <th>Condition</th>
+                <th class="text-end">Listings</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cond, cnt in conditions %}
+                <tr>
+                  <td>
+                    <span class="badge {{ 'badge-condition-new' if cond == 'Like New' else ('badge-condition-good' if cond == 'Good' else ('badge-condition-acceptable' if cond == 'Acceptable' else 'badge-condition-used')) }} rounded-pill small">
+                      {{ cond }}
+                    </span>
+                  </td>
+                  <td class="text-end fw-semibold text-dark">{{ cnt }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="2" class="text-muted small">No condition data available.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Recent Reported Listings -->
+    <div class="col-lg-6">
+      <div class="card card-bookloop p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0">Pending Listing Reports</h5>
+          <a href="{{ url_for('admin.reports') }}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+        </div>
+        {% if recent_reports %}
+          <div class="list-group list-group-flush">
+            {% for rep in recent_reports %}
+              <div class="list-group-item px-0 py-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle small">{{ rep.reason }}</span>
+                  <small class="text-muted">{{ rep.created_at.strftime('%b %d, %Y') }}</small>
+                </div>
+                <div class="fw-bold text-dark">{{ rep.book.title }}</div>
+                <div class="text-muted small mb-2">Reported by: {{ rep.reporter.full_name }}</div>
+                <div class="small text-secondary bg-light p-2 rounded">{{ rep.details }}</div>
+                <div class="mt-2 d-flex gap-2">
+                  <form method="POST" action="{{ url_for('admin.handle_report', report_id=rep.id, action='deactivate_book') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-sm btn-danger py-0 px-2">Deactivate Book</button>
+                  </form>
+                  <form method="POST" action="{{ url_for('admin.handle_report', report_id=rep.id, action='dismiss') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-2">Dismiss</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted small">
+            <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+            No pending reports. All clear!
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent User Registrations -->
+    <div class="col-lg-6">
+      <div class="card card-bookloop p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0">Recent User Registrations</h5>
+          <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="table-light small">
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>College</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in recent_users %}
+                <tr>
+                  <td>
+                    <div class="fw-semibold text-dark">{{ u.full_name }}</div>
+                    <div class="text-muted small">@{{ u.username }}</div>
+                  </td>
+                  <td>
+                    <span class="badge {{ 'bg-primary' if u.is_admin else 'bg-secondary' }} rounded-pill small">
+                      {{ u.role }}
+                    </span>
+                  </td>
+                  <td class="small text-muted text-truncate" style="max-width: 140px;">{{ u.college_name }}</td>
+                  <td>
+                    {% if u.is_active %}
+                      <span class="badge bg-success-subtle text-success small">Active</span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger small">Disabled</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

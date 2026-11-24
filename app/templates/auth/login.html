@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card p-4 p-md-5 border card-bookloop shadow-sm">
+        <div class="text-center mb-4">
+          <span class="brand-icon mx-auto mb-2"><i class="bi bi-arrow-repeat"></i></span>
+          <h3 class="fw-bold text-dark">Welcome Back</h3>
+          <p class="text-muted small">Sign in to manage your listings and book requests</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold small text-secondary">
+              Email or Username <span class="required-star">*</span>
+            </label>
+            {{ form.email(class="form-control form-control-lg fs-6", placeholder="e.g. student@college.edu or username", id="email") }}
+            {% if form.email.errors %}
+              <div class="text-danger small mt-1">
+                {% for err in form.email.errors %}{{ err }} {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <label for="password" class="form-label fw-semibold small text-secondary">
+                Password <span class="required-star">*</span>
+              </label>
+            </div>
+            {{ form.password(class="form-control form-control-lg fs-6", placeholder="••••••••", id="password") }}
+            {% if form.password.errors %}
+              <div class="text-danger small mt-1">
+                {% for err in form.password.errors %}{{ err }} {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4 form-check">
+            {{ form.remember_me(class="form-check-input", id="remember_me") }}
+            <label class="form-check-label small text-muted" for="remember_me">
+              Keep me signed in on this device
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-bookloop-primary w-100 py-2 mb-3">
+            Sign In to BookLoop
+          </button>
+        </form>
+
+        <div class="text-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+          <p class="small text-muted mb-0">
+            Don't have an account yet?
+            <a href="{{ url_for('auth.register') }}" class="fw-bold text-primary text-decoration-none ms-1">
+              Create an account
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

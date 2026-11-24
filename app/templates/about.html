@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}About Us & Campus Mission – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="text-center mb-5">
+        <span class="badge px-3 py-2 rounded-pill mb-2" style="background: var(--blue-50); color: var(--blue-700); font-weight: 600;">
+          The BookLoop Mission
+        </span>
+        <h1 class="fw-bold text-dark display-5">Affordable Textbooks. <br>Zero Student Waste.</h1>
+        <p class="text-muted lead max-w-700 mx-auto mt-3">
+          BookLoop was founded by students who believe academic literature should circulate freely and affordably across campuses, instead of sitting unused on dorm shelves.
+        </p>
+      </div>
+
+      <div class="card card-bookloop p-4 p-md-5 mb-5">
+        <h3 class="fw-bold text-dark mb-3">Our Core Philosophy</h3>
+        <p class="text-secondary" style="line-height: 1.8;">
+          Every semester, college students face crippling textbook expenses averaging $1,200 per academic year. Commercial bookstore buybacks pay pennies on the dollar, only to resell those same books to freshmen at astronomical prices.
+        </p>
+        <p class="text-secondary" style="line-height: 1.8;">
+          BookLoop cuts out middlemen. We empower students to sell their books directly to the next cohort or trade book-for-book with peers enrolled in parallel courses. Every transaction is 100% peer-to-peer with zero commission fees.
+        </p>
+
+        <div class="row g-4 mt-3">
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3 text-center border h-100">
+              <i class="bi bi-wallet2 fs-2 text-primary mb-2 d-block"></i>
+              <h6 class="fw-bold text-dark">Zero Commission</h6>
+              <p class="small text-muted mb-0">100% of purchase money stays between the students who agree on the deal.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3 text-center border h-100">
+              <i class="bi bi-arrow-repeat fs-2 text-teal mb-2 d-block" style="color: var(--teal-600);"></i>
+              <h6 class="fw-bold text-dark">True Course Swaps</h6>
+              <p class="small text-muted mb-0">Exchange your completed term textbooks directly for next semester's reading list.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3 text-center border h-100">
+              <i class="bi bi-shield-check fs-2 text-success mb-2 d-block"></i>
+              <h6 class="fw-bold text-dark">Verified Campus Meetups</h6>
+              <p class="small text-muted mb-0">Safe, daylight meetups at college libraries, quad lawns, and student unions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div id="faq" class="mb-5">
+        <h3 class="fw-bold text-dark mb-4 text-center">Frequently Asked Questions</h3>
+        <div class="accordion" id="bookloopFaq">
+          <div class="accordion-item card-bookloop mb-3 border">
+            <h2 class="accordion-header" id="faqOne">
+              <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                How are payments handled on BookLoop?
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#bookloopFaq">
+              <div class="accordion-body text-secondary small" style="line-height: 1.7;">
+                BookLoop is designed specifically for peer-to-peer campus communities. When a seller accepts your purchase or exchange request, contact information is revealed so you can meet up on campus. Payment is completed in person (cash, campus card, or mutually agreed peer apps) after inspecting the book.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card-bookloop mb-3 border">
+            <h2 class="accordion-header" id="faqTwo">
+              <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                How do book exchanges work?
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#bookloopFaq">
+              <div class="accordion-body text-secondary small" style="line-height: 1.7;">
+                To propose an exchange, you must have at least one book listed in your account. When proposing an exchange, you select which of your books you want to offer in trade. The owner can review your book's condition and choose to accept or decline the swap.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item card-bookloop mb-3 border">
+            <h2 class="accordion-header" id="faqThree">
+              <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Is BookLoop free to use?
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#bookloopFaq">
+              <div class="accordion-body text-secondary small" style="line-height: 1.7;">
+                Yes! BookLoop is 100% free for college students. We charge zero listing fees, zero transaction percentages, and zero subscription charges.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

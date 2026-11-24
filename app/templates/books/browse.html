@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Textbooks & Academic Books – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">Browse Course Textbooks</h2>
+      <p class="text-muted small mb-0">Discover affordable books or exchange reading materials with fellow students.</p>
+    </div>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('books.create') }}" class="btn btn-bookloop-accent d-flex align-items-center gap-2">
+        <i class="bi bi-plus-lg"></i> List a Textbook
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="row g-4">
+    <!-- Filter Sidebar (Col 3) -->
+    <div class="col-lg-3">
+      <div class="filter-sidebar mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0"><i class="bi bi-funnel me-1"></i> Filters</h5>
+          <a href="{{ url_for('books.browse') }}" class="text-decoration-none small text-muted">Reset All</a>
+        </div>
+
+        <form method="GET" action="{{ url_for('books.browse') }}">
+          <!-- Keyword Search -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Keyword / Title / Author</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" name="q" class="form-control border-start-0" placeholder="e.g. Calculus, Cormen..." value="{{ q }}">
+            </div>
+          </div>
+
+          <!-- Subject -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Subject / Course</label>
+            <input type="text" name="subject" class="form-control" placeholder="e.g. Algorithms, Anatomy..." value="{{ subject }}">
+          </div>
+
+          <!-- Department -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Department / Branch</label>
+            <select name="department" class="form-select">
+              <option value="">All Departments</option>
+              {% for dept in departments %}
+                {% if dept[0] != '' %}
+                  <option value="{{ dept[0] }}" {% if department == dept[0] %}selected{% endif %}>{{ dept[1] }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Semester -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Semester / Level</label>
+            <select name="semester" class="form-select">
+              <option value="">All Semesters</option>
+              {% for sem in semesters %}
+                {% if sem[0] != '' %}
+                  <option value="{{ sem[0] }}" {% if semester == sem[0] %}selected{% endif %}>{{ sem[1] }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Condition -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Book Condition</label>
+            <select name="condition" class="form-select">
+              <option value="">Any Condition</option>
+              {% for cond in conditions %}
+                <option value="{{ cond[0] }}" {% if condition == cond[0] %}selected{% endif %}>{{ cond[0] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Listing Type -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Availability Mode</label>
+            <select name="listing_type" class="form-select">
+              <option value="">Sell or Exchange</option>
+              {% for ltype in listing_types %}
+                <option value="{{ ltype[0] }}" {% if listing_type == ltype[0] %}selected{% endif %}>{{ ltype[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Price Range -->
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Price Range ($)</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="number" step="0.5" name="min_price" class="form-control" placeholder="Min $" value="{{ min_price if min_price is not none else '' }}">
+              </div>
+              <div class="col-6">
+                <input type="number" step="0.5" name="max_price" class="form-control" placeholder="Max $" value="{{ max_price if max_price is not none else '' }}">
+              </div>
+            </div>
+          </div>
+
+          <!-- Sorting -->
+          <div class="mb-4">
+            <label class="form-label small fw-semibold text-secondary">Sort By</label>
+            <select name="sort_by" class="form-select">
+              <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+              <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+              <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-bookloop-primary w-100 py-2">
+            Apply Filters
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Books Listing Grid (Col 9) -->
+    <div class="col-lg-9">
+      <!-- Search Summary bar -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted small">
+          Showing <strong>{{ books | length }}</strong> of <strong>{{ pagination.total }}</strong> available books
+        </span>
+        {% if q or department or semester or condition or listing_type or min_price is not none or max_price is not none %}
+          <span class="badge bg-light text-dark border">
+            Filtered Search
+          </span>
+        {% endif %}
+      </div>
+
+      <!-- Books Cards -->
+      <div class="row g-4">
+        {% if books %}
+          {% for book in books %}
+            <div class="col-md-6 col-xl-4">
+              <div class="card card-bookloop card-bookloop-hover h-100 position-relative">
+                <!-- Wishlist Heart Toggle Button -->
+                {% if current_user.is_authenticated and current_user.id != book.user_id %}
+                  <button type="button" class="btn-wishlist-overlay btn-wishlist-toggle {{ 'active' if current_user.has_in_wishlist(book.id) else '' }}" data-book-id="{{ book.id }}" title="Save to wishlist">
+                    <i class="bi {{ 'bi-heart-fill text-danger' if current_user.has_in_wishlist(book.id) else 'bi-heart' }}"></i>
+                  </button>
+                {% endif %}
+
+                <!-- Cover Image -->
+                <div class="book-cover-container">
+                  <img src="{{ book.cover_image_url or url_for('static', filename='images/book_placeholder.png') }}"
+                       alt="{{ book.title }}"
+                       class="book-cover-img"
+                       onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';">
+                </div>
+
+                <!-- Content -->
+                <div class="card-body p-3 d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-center gap-1 mb-2">
+                    <span class="badge {{ 'badge-condition-new' if book.condition == 'Like New' else ('badge-condition-good' if book.condition == 'Good' else ('badge-condition-acceptable' if book.condition == 'Acceptable' else 'badge-condition-used')) }} rounded-pill px-2 py-1 small">
+                      {{ book.condition }}
+                    </span>
+                    <span class="badge {{ 'badge-type-sell' if book.listing_type == 'Sell' else ('badge-type-exchange' if book.listing_type == 'Exchange' else 'badge-type-both') }} rounded-pill px-2 py-1 small">
+                      {{ book.listing_type }}
+                    </span>
+                  </div>
+
+                  <h6 class="card-title fw-bold text-dark mb-1 text-truncate" title="{{ book.title }}">
+                    <a href="{{ url_for('books.detail', book_id=book.id) }}" class="text-dark text-decoration-none">
+                      {{ book.title }}
+                    </a>
+                  </h6>
+                  <p class="card-text text-muted small mb-2 text-truncate">
+                    by {{ book.author }}
+                  </p>
+
+                  <div class="small text-secondary mb-3">
+                    <i class="bi bi-mortarboard me-1"></i> {{ book.department }}
+                  </div>
+
+                  <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                    <div>
+                      <span class="fw-bold fs-5 text-dark">{{ book.formatted_price }}</span>
+                    </div>
+                    <a href="{{ url_for('books.detail', book_id=book.id) }}" class="btn btn-sm btn-bookloop-primary px-3 rounded-pill">
+                      View
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12 text-center py-5">
+            <div class="p-5 bg-white rounded-4 border">
+              <i class="bi bi-journal-x fs-1 text-muted mb-3 d-block"></i>
+              <h4 class="fw-bold text-dark">No matching textbooks found</h4>
+              <p class="text-muted">Try adjusting your filters, clearing search keywords, or browse all departments.</p>
+              <a href="{{ url_for('books.browse') }}" class="btn btn-bookloop-secondary mt-2">Clear All Filters</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+        <nav class="mt-5" aria-label="Book pagination">
+          <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('books.browse', page=pagination.prev_num, q=q, subject=subject, department=department, semester=semester, condition=condition, listing_type=listing_type, min_price=min_price, max_price=max_price, sort_by=sort_by) }}">
+                  Previous
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+              {% if p %}
+                {% if p == pagination.page %}
+                  <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                {% else %}
+                  <li class="page-item">
+                    <a class="page-link" href="{{ url_for('books.browse', page=p, q=q, subject=subject, department=department, semester=semester, condition=condition, listing_type=listing_type, min_price=min_price, max_price=max_price, sort_by=sort_by) }}">
+                      {{ p }}
+                    </a>
+                  </li>
+                {% endif %}
+              {% else %}
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('books.browse', page=pagination.next_num, q=q, subject=subject, department=department, semester=semester, condition=condition, listing_type=listing_type, min_price=min_price, max_price=max_price, sort_by=sort_by) }}">
+                  Next
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

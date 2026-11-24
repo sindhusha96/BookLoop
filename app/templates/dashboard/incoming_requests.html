@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Incoming Book Requests – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">Incoming Book Requests</h2>
+      <p class="text-muted small mb-0">Manage purchase and exchange requests sent by other students for your books.</p>
+    </div>
+    <a href="{{ url_for('dashboard.sent_requests') }}" class="btn btn-bookloop-secondary">
+      View Sent Requests <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+
+  <!-- Status Filter Pills -->
+  <ul class="nav nav-pills mb-4 gap-2">
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if current_filter == 'all' else 'bg-white border text-dark' }} rounded-pill px-3 py-1 small" href="{{ url_for('dashboard.incoming_requests', status='all') }}">
+        All Requests
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if current_filter == 'pending' else 'bg-white border text-dark' }} rounded-pill px-3 py-1 small" href="{{ url_for('dashboard.incoming_requests', status='pending') }}">
+        Pending
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if current_filter == 'accepted' else 'bg-white border text-dark' }} rounded-pill px-3 py-1 small" href="{{ url_for('dashboard.incoming_requests', status='accepted') }}">
+        Accepted / In-Progress
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if current_filter == 'completed' else 'bg-white border text-dark' }} rounded-pill px-3 py-1 small" href="{{ url_for('dashboard.incoming_requests', status='completed') }}">
+        Completed
+      </a>
+    </li>
+  </ul>
+
+  {% if requests %}
+    <div class="d-flex flex-column gap-3">
+      {% for req in requests %}
+        <div class="card card-bookloop p-4 shadow-sm">
+          <div class="row g-3 align-items-center">
+            <!-- Book Cover & Info -->
+            <div class="col-md-5">
+              <div class="d-flex gap-3 align-items-center">
+                <img src="{{ req.book.cover_image_url or url_for('static', filename='images/book_placeholder.png') }}"
+                     alt="{{ req.book.title }}"
+                     class="rounded border"
+                     style="width: 60px; height: 80px; object-fit: cover;"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';">
+                <div>
+                  <div class="d-flex gap-2 align-items-center mb-1">
+                    <span class="badge {{ 'badge-type-sell' if req.request_type == 'purchase' else 'badge-type-exchange' }} rounded-pill small">
+                      {{ req.request_type | capitalize }} Request
+                    </span>
+                    <span class="badge {{ 'badge-status-pending' if req.status == 'Pending' else ('badge-status-accepted' if req.status == 'Accepted' else ('badge-status-completed' if req.status == 'Completed' else 'badge-status-rejected')) }} rounded-pill small">
+                      {{ req.status }}
+                    </span>
+                  </div>
+                  <h6 class="fw-bold mb-1">
+                    <a href="{{ url_for('books.detail', book_id=req.book.id) }}" class="text-dark text-decoration-none">
+                      {{ req.book.title }}
+                    </a>
+                  </h6>
+                  <div class="text-muted small">Requested on {{ req.created_at.strftime('%b %d, %Y') }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Requester / Offered Book Details -->
+            <div class="col-md-4">
+              <div class="p-2 rounded bg-light border small">
+                <div class="fw-semibold text-dark">
+                  <i class="bi bi-person me-1"></i> From: {{ req.requester.full_name }}
+                </div>
+                <div class="text-muted"><i class="bi bi-building me-1"></i> {{ req.requester.college_name }}</div>
+
+                {% if req.request_type == 'exchange' and req.offered_book %}
+                  <div class="mt-2 pt-2 border-top">
+                    <span class="fw-semibold text-primary"><i class="bi bi-arrow-repeat me-1"></i> Offered in swap:</span>
+                    <div class="fw-bold text-dark text-truncate">{{ req.offered_book.title }}</div>
+                    <div class="text-muted">Condition: {{ req.offered_book.condition }}</div>
+                  </div>
+                {% endif %}
+
+                {% if req.message %}
+                  <div class="mt-2 text-secondary fst-italic">
+                    "{{ req.message }}"
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Action Column -->
+            <div class="col-md-3 text-md-end">
+              {% if req.status == 'Pending' %}
+                <div class="d-flex flex-column gap-2">
+                  <form method="POST" action="{{ url_for('requests.accept_request', request_id=req.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-success btn-sm w-100">
+                      <i class="bi bi-check-lg me-1"></i> Accept Request
+                    </button>
+                  </form>
+                  <form method="POST" action="{{ url_for('requests.reject_request', request_id=req.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                      <i class="bi bi-x-lg me-1"></i> Decline
+                    </button>
+                  </form>
+                </div>
+
+              {% elif req.status == 'Accepted' %}
+                <form method="POST" action="{{ url_for('requests.complete_request', request_id=req.id) }}" class="mb-2">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                  <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-check2-all me-1"></i> Mark as Completed
+                  </button>
+                </form>
+                <span class="badge bg-success-subtle text-success border border-success-subtle d-block py-2">
+                  In Progress
+                </span>
+
+              {% elif req.status == 'Completed' %}
+                <span class="badge bg-light text-success border border-success d-block py-2">
+                  <i class="bi bi-check-circle-fill me-1"></i> Completed
+                </span>
+
+              {% else %}
+                <span class="badge bg-light text-muted border d-block py-2">
+                  {{ req.status }}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Revealed Student Contact Card for Accepted Requests -->
+          {% if req.status == 'Accepted' %}
+            <div class="mt-3 p-3 rounded-3 border bg-light">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-shield-check text-success fs-5"></i>
+                <h6 class="fw-bold text-dark mb-0">Buyer / Exchanger Contact Coordinates</h6>
+              </div>
+              <p class="small text-muted mb-2">
+                Coordinate a convenient on-campus meeting location (library lobby, campus cafe) to exchange books and handle cash payment directly:
+              </p>
+              <div class="row g-2 small">
+                <div class="col-sm-4">
+                  <strong class="text-dark">Student:</strong> {{ req.requester.full_name }} (@{{ req.requester.username }})
+                </div>
+                <div class="col-sm-4">
+                  <strong class="text-dark">Email:</strong> <a href="mailto:{{ req.requester.email }}">{{ req.requester.email }}</a>
+                </div>
+                {% if req.requester.phone %}
+                  <div class="col-sm-4">
+                    <strong class="text-dark">Phone:</strong> <a href="tel:{{ req.requester.phone }}">{{ req.requester.phone }}</a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 bg-white rounded-4 border card-bookloop">
+      <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+      <h4 class="fw-bold text-dark">No requests found</h4>
+      <p class="text-muted small">You don't currently have any {{ current_filter if current_filter != 'all' else '' }} requests received for your books.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

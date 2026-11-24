@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Listing: {{ book.title }} – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card card-bookloop p-4 p-md-5">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="brand-icon"><i class="bi bi-pencil-square"></i></span>
+          <h3 class="fw-bold text-dark mb-0">Edit Book Listing</h3>
+        </div>
+        <p class="text-muted small mb-4">
+          Update the pricing, description, or details of your listing.
+        </p>
+
+        <form method="POST" action="{{ url_for('books.edit', book_id=book.id) }}" enctype="multipart/form-data">
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            <label for="title" class="form-label fw-semibold small text-secondary">
+              Book Title <span class="required-star">*</span>
+            </label>
+            {{ form.title(class="form-control form-control-lg fs-6", id="title") }}
+            {% if form.title.errors %}
+              <div class="text-danger small mt-1">{% for err in form.title.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-8">
+              <label for="author" class="form-label fw-semibold small text-secondary">
+                Author(s) <span class="required-star">*</span>
+              </label>
+              {{ form.author(class="form-control", id="author") }}
+              {% if form.author.errors %}
+                <div class="text-danger small mt-1">{% for err in form.author.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-4">
+              <label for="isbn" class="form-label fw-semibold small text-secondary">
+                ISBN (Optional)
+              </label>
+              {{ form.isbn(class="form-control", id="isbn") }}
+              {% if form.isbn.errors %}
+                <div class="text-danger small mt-1">{% for err in form.isbn.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="department" class="form-label fw-semibold small text-secondary">
+                Department / Discipline <span class="required-star">*</span>
+              </label>
+              {{ form.department(class="form-select", id="department") }}
+              {% if form.department.errors %}
+                <div class="text-danger small mt-1">{% for err in form.department.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="semester" class="form-label fw-semibold small text-secondary">
+                Semester / Level <span class="required-star">*</span>
+              </label>
+              {{ form.semester(class="form-select", id="semester") }}
+              {% if form.semester.errors %}
+                <div class="text-danger small mt-1">{% for err in form.semester.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="subject" class="form-label fw-semibold small text-secondary">
+                Subject / Course Name <span class="required-star">*</span>
+              </label>
+              {{ form.subject(class="form-control", id="subject") }}
+              {% if form.subject.errors %}
+                <div class="text-danger small mt-1">{% for err in form.subject.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="edition" class="form-label fw-semibold small text-secondary">
+                Edition (Optional)
+              </label>
+              {{ form.edition(class="form-control", id="edition") }}
+              {% if form.edition.errors %}
+                <div class="text-danger small mt-1">{% for err in form.edition.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="condition" class="form-label fw-semibold small text-secondary">
+                Physical Condition <span class="required-star">*</span>
+              </label>
+              {{ form.condition(class="form-select", id="condition") }}
+              {% if form.condition.errors %}
+                <div class="text-danger small mt-1">{% for err in form.condition.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+            <div class="col-sm-6">
+              <label for="listing_type" class="form-label fw-semibold small text-secondary">
+                Listing Type <span class="required-star">*</span>
+              </label>
+              {{ form.listing_type(class="form-select", id="listing_type") }}
+              {% if form.listing_type.errors %}
+                <div class="text-danger small mt-1">{% for err in form.listing_type.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3" id="price-field-wrapper">
+            <label for="price" class="form-label fw-semibold small text-secondary">
+              Price ($ USD)
+            </label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              {{ form.price(class="form-control", id="price") }}
+            </div>
+            {% if form.price.errors %}
+              <div class="text-danger small mt-1">{% for err in form.price.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label fw-semibold small text-secondary">
+              Book Description & Wear Notes <span class="required-star">*</span>
+            </label>
+            {{ form.description(class="form-control", rows=4, id="description") }}
+            {% if form.description.errors %}
+              <div class="text-danger small mt-1">{% for err in form.description.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label for="cover_image" class="form-label fw-semibold small text-secondary">
+              Replace Cover Photo (Optional)
+            </label>
+            {{ form.cover_image(class="form-control", id="cover_image", accept="image/*") }}
+            {% if form.cover_image.errors %}
+              <div class="text-danger small mt-1">{% for err in form.cover_image.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+
+            <!-- Current image preview -->
+            {% if book.cover_image_url %}
+              <div class="mt-2">
+                <span class="small text-muted d-block mb-1">Current Cover Image:</span>
+                <img src="{{ book.cover_image_url }}" alt="Current cover" class="img-thumbnail" style="max-height: 120px;">
+              </div>
+            {% endif %}
+
+            <!-- Instant Replacement Preview -->
+            <div id="image-preview-wrapper" class="mt-3 d-none">
+              <span class="small fw-semibold text-secondary d-block mb-1">New Image Preview:</span>
+              <img id="image-preview" src="#" alt="New Cover preview" class="img-thumbnail" style="max-height: 200px; object-fit: contain;">
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a href="{{ url_for('books.detail', book_id=book.id) }}" class="btn btn-bookloop-secondary">Cancel</a>
+            <button type="submit" class="btn btn-bookloop-primary px-4">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

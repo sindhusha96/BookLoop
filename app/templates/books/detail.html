@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} by {{ book.author }} – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('books.browse') }}" class="text-decoration-none">Browse</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('books.browse', department=book.department) }}" class="text-decoration-none">{{ book.department }}</a></li>
+      <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 250px;">{{ book.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Left Column: Book Image & Quick Status -->
+    <div class="col-lg-5">
+      <div class="detail-cover-wrapper p-3 text-center mb-4">
+        <img src="{{ book.cover_image_url or url_for('static', filename='images/book_placeholder.png') }}"
+             alt="{{ book.title }}"
+             class="img-fluid rounded-3 detail-cover-img"
+             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';">
+      </div>
+
+      <!-- Campus Peer Trust Info -->
+      <div class="card card-bookloop p-3">
+        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-success me-2"></i>Campus Exchange Safety</h6>
+        <p class="small text-muted mb-0">
+          BookLoop transactions are arranged in person on campus. Inspect the book thoroughly before completing the hand-off. Never wire money online.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Book Details & Actions -->
+    <div class="col-lg-7">
+      <div class="card card-bookloop p-4 p-md-5">
+        <!-- Badges -->
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+          <span class="badge {{ 'badge-condition-new' if book.condition == 'Like New' else ('badge-condition-good' if book.condition == 'Good' else ('badge-condition-acceptable' if book.condition == 'Acceptable' else 'badge-condition-used')) }} px-3 py-1 rounded-pill">
+            {{ book.condition }}
+          </span>
+          <span class="badge {{ 'badge-type-sell' if book.listing_type == 'Sell' else ('badge-type-exchange' if book.listing_type == 'Exchange' else 'badge-type-both') }} px-3 py-1 rounded-pill">
+            {{ book.listing_type }}
+          </span>
+          {% if not book.is_available %}
+            <span class="badge bg-secondary px-3 py-1 rounded-pill">Unavailable</span>
+          {% elif book.is_reserved %}
+            <span class="badge bg-warning text-dark px-3 py-1 rounded-pill">Reserved (Active Request)</span>
+          {% else %}
+            <span class="badge bg-success px-3 py-1 rounded-pill">Available</span>
+          {% endif %}
+        </div>
+
+        <!-- Title & Author -->
+        <h2 class="fw-bold text-dark mb-2">{{ book.title }}</h2>
+        <h5 class="text-secondary fw-normal mb-3">by {{ book.author }}</h5>
+
+        <!-- Price Banner -->
+        <div class="p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center" style="background: var(--bg-canvas); border: 1px solid var(--border-color);">
+          <div>
+            <small class="text-muted text-uppercase fw-semibold d-block">Listing Price / Mode</small>
+            <span class="fs-3 fw-bold text-dark">{{ book.formatted_price }}</span>
+          </div>
+          {% if book.listing_type in ['Exchange', 'Both'] %}
+            <span class="badge bg-info text-dark px-3 py-2 rounded-pill">
+              <i class="bi bi-arrow-repeat me-1"></i> Open to Exchange
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Book Specifications Table -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-sm-4">
+            <span class="text-muted small d-block">Department</span>
+            <span class="fw-semibold text-dark">{{ book.department }}</span>
+          </div>
+          <div class="col-6 col-sm-4">
+            <span class="text-muted small d-block">Semester</span>
+            <span class="fw-semibold text-dark">{{ book.semester }}</span>
+          </div>
+          <div class="col-6 col-sm-4">
+            <span class="text-muted small d-block">Subject</span>
+            <span class="fw-semibold text-dark">{{ book.subject }}</span>
+          </div>
+          {% if book.edition %}
+            <div class="col-6 col-sm-4">
+              <span class="text-muted small d-block">Edition</span>
+              <span class="fw-semibold text-dark">{{ book.edition }}</span>
+            </div>
+          {% endif %}
+          {% if book.isbn %}
+            <div class="col-6 col-sm-4">
+              <span class="text-muted small d-block">ISBN</span>
+              <span class="fw-semibold text-dark">{{ book.isbn }}</span>
+            </div>
+          {% endif %}
+          <div class="col-6 col-sm-4">
+            <span class="text-muted small d-block">Listed On</span>
+            <span class="fw-semibold text-dark">{{ book.created_at.strftime('%b %d, %Y') }}</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-dark mb-2">Description & Notes</h6>
+          <p class="text-secondary" style="white-space: pre-line; line-height: 1.6;">{{ book.description }}</p>
+        </div>
+
+        <!-- Owner Information Box -->
+        <div class="p-3 rounded-3 mb-4 border" style="background-color: var(--bg-surface);">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--navy-900), var(--blue-600));">
+              {{ book.owner.full_name[0] | upper }}
+            </div>
+            <div>
+              <div class="fw-bold text-dark">{{ book.owner.full_name }}</div>
+              <div class="text-muted small"><i class="bi bi-building me-1"></i> {{ book.owner.college_name }}</div>
+            </div>
+          </div>
+          <div class="mt-2 text-muted small border-top pt-2" style="border-color: var(--border-color) !important;">
+            <i class="bi bi-lock me-1"></i> Contact phone and direct exchange coordinates are shared securely once a request is accepted.
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        {% if current_user.is_authenticated %}
+          {% if current_user.id == book.user_id or current_user.is_admin %}
+            <!-- Owner / Admin Actions -->
+            <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+              <a href="{{ url_for('books.edit', book_id=book.id) }}" class="btn btn-bookloop-secondary">
+                <i class="bi bi-pencil me-1"></i> Edit Listing
+              </a>
+              <form method="POST" action="{{ url_for('books.toggle_status', book_id=book.id) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                <button type="submit" class="btn btn-outline-secondary">
+                  <i class="bi bi-power me-1"></i> Mark as {{ 'Unavailable' if book.is_available else 'Available' }}
+                </button>
+              </form>
+              <button type="button" class="btn btn-outline-danger ms-auto" data-bs-toggle="modal" data-bs-target="#deleteBookModal">
+                <i class="bi bi-trash me-1"></i> Delete
+              </button>
+            </div>
+
+          {% else %}
+            <!-- Student Buyer / Exchanger Actions -->
+            <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+              <!-- Wishlist toggle -->
+              <button type="button" class="btn btn-bookloop-secondary btn-wishlist-toggle {{ 'active' if is_in_wishlist else '' }}" data-book-id="{{ book.id }}">
+                <i class="bi {{ 'bi-heart-fill text-danger' if is_in_wishlist else 'bi-heart' }} me-1"></i>
+                <span class="wishlist-text">{{ 'Saved in Wishlist' if is_in_wishlist else 'Save to Wishlist' }}</span>
+              </button>
+
+              {% if book.is_available and not book.is_reserved %}
+                <!-- Purchase Button -->
+                {% if book.listing_type in ['Sell', 'Both'] %}
+                  <button type="button" class="btn btn-bookloop-primary" data-bs-toggle="modal" data-bs-target="#purchaseModal">
+                    <i class="bi bi-bag-check me-1"></i> Request Purchase
+                  </button>
+                {% endif %}
+
+                <!-- Exchange Button -->
+                {% if book.listing_type in ['Exchange', 'Both'] %}
+                  <button type="button" class="btn btn-bookloop-accent" data-bs-toggle="modal" data-bs-target="#exchangeModal">
+                    <i class="bi bi-arrow-repeat me-1"></i> Propose Exchange
+                  </button>
+                {% endif %}
+              {% else %}
+                <button class="btn btn-secondary disabled" disabled>
+                  {% if not book.is_available %}Listing Unavailable{% else %}Currently Reserved{% endif %}
+                </button>
+              {% endif %}
+
+              <!-- Report Listing -->
+              <button type="button" class="btn btn-link text-muted small ms-auto text-decoration-none" data-bs-toggle="modal" data-bs-target="#reportModal">
+                <i class="bi bi-flag me-1"></i> Report
+              </button>
+            </div>
+          {% endif %}
+
+        {% else %}
+          <!-- Guest Call-to-Action -->
+          <div class="p-3 bg-light rounded-3 text-center border">
+            <p class="mb-2 text-dark fw-semibold">Interested in this textbook?</p>
+            <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-bookloop-primary btn-sm me-2">
+              Sign In to Request
+            </a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-bookloop-secondary btn-sm">
+              Create Account
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Department Books -->
+  {% if related_books %}
+    <div class="mt-5 pt-4 border-top">
+      <h4 class="fw-bold text-dark mb-3">Other Books in {{ book.department }}</h4>
+      <div class="row g-4">
+        {% for rel in related_books %}
+          <div class="col-md-4">
+            <div class="card card-bookloop card-bookloop-hover h-100 p-3">
+              <div class="d-flex gap-3 align-items-center">
+                <img src="{{ rel.cover_image_url or url_for('static', filename='images/book_placeholder.png') }}"
+                     alt="{{ rel.title }}"
+                     class="rounded"
+                     style="width: 60px; height: 80px; object-fit: cover;"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';">
+                <div class="text-truncate">
+                  <h6 class="fw-bold mb-1 text-truncate"><a href="{{ url_for('books.detail', book_id=rel.id) }}" class="text-dark text-decoration-none">{{ rel.title }}</a></h6>
+                  <div class="text-muted small text-truncate">by {{ rel.author }}</div>
+                  <div class="fw-bold text-primary mt-1">{{ rel.formatted_price }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- ================= MODALS ================= -->
+
+{% if current_user.is_authenticated and current_user.id != book.user_id %}
+  <!-- Purchase Modal -->
+  <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form method="POST" action="{{ url_for('requests.create_purchase_request', book_id=book.id) }}">
+          {{ purchase_form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="purchaseModalLabel">Request to Purchase</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              You are requesting to buy <strong>{{ book.title }}</strong> from <strong>{{ book.owner.full_name }}</strong> for <strong>{{ book.formatted_price }}</strong>.
+            </p>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Note to seller (Optional)</label>
+              {{ purchase_form.message(class="form-control", rows=3, placeholder="e.g. Hi! I can meet tomorrow at the campus library around 2 PM...") }}
+            </div>
+            <div class="alert alert-info small py-2">
+              <i class="bi bi-info-circle me-1"></i> Payment and pickup will be conducted directly on campus. No online payment is processed through BookLoop.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-bookloop-primary">Send Purchase Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exchange Modal -->
+  <div class="modal fade" id="exchangeModal" tabindex="-1" aria-labelledby="exchangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form method="POST" action="{{ url_for('requests.create_exchange_request', book_id=book.id) }}">
+          {{ exchange_form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold" id="exchangeModalLabel">Propose Book Exchange</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              Offer one of your available listed books in exchange for <strong>{{ book.title }}</strong>.
+            </p>
+            {% if user_available_books %}
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Choose Your Book to Offer <span class="required-star">*</span></label>
+                {{ exchange_form.offered_book_id(class="form-select") }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Note to owner (Optional)</label>
+                {{ exchange_form.message(class="form-control", rows=3, placeholder="e.g. My copy is in great condition, let me know if this swap works for you!") }}
+              </div>
+            {% else %}
+              <div class="alert alert-warning small">
+                <i class="bi bi-exclamation-triangle me-1"></i> You don't have any available books in your listings to offer.
+                <div class="mt-2">
+                  <a href="{{ url_for('books.create') }}" class="btn btn-sm btn-dark">List a Book First</a>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            {% if user_available_books %}
+              <button type="submit" class="btn btn-bookloop-accent">Send Exchange Proposal</button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form method="POST" action="{{ url_for('books.report', book_id=book.id) }}">
+          {{ report_form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-danger" id="reportModalLabel">
+              <i class="bi bi-flag-fill me-1"></i> Report Listing
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-3">
+              Help keep BookLoop safe. If this listing violates campus guidelines, is a scam, or contains inappropriate content, please report it.
+            </p>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Reason for Report <span class="required-star">*</span></label>
+              {{ report_form.reason(class="form-select") }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Details / Explanation <span class="required-star">*</span></label>
+              {{ report_form.details(class="form-control", rows=3, placeholder="Please provide specific details...") }}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Submit Report</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Delete Modal (Owner / Admin) -->
+{% if current_user.is_authenticated and (current_user.id == book.user_id or current_user.is_admin) %}
+  <div class="modal fade" id="deleteBookModal" tabindex="-1" aria-labelledby="deleteBookModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form method="POST" action="{{ url_for('books.delete', book_id=book.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold text-danger" id="deleteBookModalLabel">Delete Listing</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to permanently delete <strong>"{{ book.title }}"</strong>? This action cannot be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Yes, Delete Listing</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

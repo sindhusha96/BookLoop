@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Book Listings – Admin BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+    <div>
+      <h2 class="fw-bold text-dark mb-1">Book Listing Moderation</h2>
+      <p class="text-muted small mb-0">Oversee all academic listings across departments and campuses.</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="card card-bookloop p-3 mb-4">
+    <form method="GET" action="{{ url_for('admin.books') }}" class="row g-2 align-items-center">
+      <div class="col-md-7">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" name="q" class="form-control" placeholder="Search by title, author, or ISBN..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+          <option value="reserved" {% if status_filter == 'reserved' %}selected{% endif %}>Reserved</option>
+          <option value="unavailable" {% if status_filter == 'unavailable' %}selected{% endif %}>Unavailable</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-bookloop-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Books Table -->
+  <div class="card card-bookloop overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light small">
+          <tr>
+            <th>Book Title</th>
+            <th>Owner</th>
+            <th>Department</th>
+            <th>Price</th>
+            <th>Condition</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ book.title }}</div>
+                <div class="text-muted small">by {{ book.author }}</div>
+              </td>
+              <td>
+                <span class="small fw-semibold text-dark">{{ book.owner.full_name }}</span>
+                <span class="text-muted small d-block">@{{ book.owner.username }}</span>
+              </td>
+              <td class="small text-muted">{{ book.department }}</td>
+              <td class="fw-bold text-dark small">{{ book.formatted_price }}</td>
+              <td>
+                <span class="badge {{ 'badge-condition-new' if book.condition == 'Like New' else ('badge-condition-good' if book.condition == 'Good' else ('badge-condition-acceptable' if book.condition == 'Acceptable' else 'badge-condition-used')) }} rounded-pill small">
+                  {{ book.condition }}
+                </span>
+              </td>
+              <td>
+                {% if not book.is_available %}
+                  <span class="badge bg-secondary rounded-pill small">Unavailable</span>
+                {% elif book.is_reserved %}
+                  <span class="badge bg-warning text-dark rounded-pill small">Reserved</span>
+                {% else %}
+                  <span class="badge bg-success rounded-pill small">Available</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="{{ url_for('books.detail', book_id=book.id) }}" class="btn btn-outline-secondary" target="_blank" title="View details">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                  <form method="POST" action="{{ url_for('books.toggle_status', book_id=book.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-outline-secondary" title="Toggle availability">
+                      <i class="bi bi-power {{ 'text-danger' if book.is_available else 'text-success' }}"></i>
+                    </button>
+                  </form>
+                  <form method="POST" action="{{ url_for('books.delete', book_id=book.id) }}" class="d-inline" onsubmit="return confirm('Delete listing \'{{ book.title }}\'?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                    <button type="submit" class="btn btn-outline-danger" title="Delete listing">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-4 text-muted">No books found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

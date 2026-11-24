@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Create Student Account – BookLoop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 p-md-5 border card-bookloop shadow-sm">
+        <div class="text-center mb-4">
+          <span class="brand-icon mx-auto mb-2"><i class="bi bi-mortarboard"></i></span>
+          <h3 class="fw-bold text-dark">Join BookLoop</h3>
+          <p class="text-muted small">Connect with students across your campus to exchange and buy textbooks</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          {{ form.hidden_tag() }}
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label for="username" class="form-label fw-semibold small text-secondary">
+                Username <span class="required-star">*</span>
+              </label>
+              {{ form.username(class="form-control", placeholder="e.g. alex_rivera", id="username") }}
+              {% if form.username.errors %}
+                <div class="text-danger small mt-1">{% for err in form.username.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6">
+              <label for="full_name" class="form-label fw-semibold small text-secondary">
+                Full Name <span class="required-star">*</span>
+              </label>
+              {{ form.full_name(class="form-control", placeholder="e.g. Alex Rivera", id="full_name") }}
+              {% if form.full_name.errors %}
+                <div class="text-danger small mt-1">{% for err in form.full_name.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label fw-semibold small text-secondary">
+              College or Personal Email <span class="required-star">*</span>
+            </label>
+            {{ form.email(class="form-control", placeholder="e.g. alex@campus.edu", id="email") }}
+            {% if form.email.errors %}
+              <div class="text-danger small mt-1">{% for err in form.email.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="college_name" class="form-label fw-semibold small text-secondary">
+              College / University Name <span class="required-star">*</span>
+            </label>
+            {{ form.college_name(class="form-control", placeholder="e.g. State University or Engineering Institute", id="college_name") }}
+            {% if form.college_name.errors %}
+              <div class="text-danger small mt-1">{% for err in form.college_name.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold small text-secondary">
+              Contact Phone Number <span class="text-muted fw-normal">(Optional)</span>
+            </label>
+            {{ form.phone(class="form-control", placeholder="e.g. +1 (555) 019-2834", id="phone") }}
+            <div class="form-text small text-muted">
+              <i class="bi bi-shield-lock me-1"></i> Your phone number is kept private and only shared when you accept an exchange/purchase request.
+            </div>
+            {% if form.phone.errors %}
+              <div class="text-danger small mt-1">{% for err in form.phone.errors %}{{ err }} {% endfor %}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <label for="password" class="form-label fw-semibold small text-secondary">
+                Password <span class="required-star">*</span>
+              </label>
+              {{ form.password(class="form-control", placeholder="Min 8 characters", id="password") }}
+              {% if form.password.errors %}
+                <div class="text-danger small mt-1">{% for err in form.password.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6">
+              <label for="confirm_password" class="form-label fw-semibold small text-secondary">
+                Confirm Password <span class="required-star">*</span>
+              </label>
+              {{ form.confirm_password(class="form-control", placeholder="Re-enter password", id="confirm_password") }}
+              {% if form.confirm_password.errors %}
+                <div class="text-danger small mt-1">{% for err in form.confirm_password.errors %}{{ err }} {% endfor %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-bookloop-primary w-100 py-2 mb-3">
+            Create Student Account
+          </button>
+        </form>
+
+        <div class="text-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+          <p class="small text-muted mb-0">
+            Already registered on BookLoop?
+            <a href="{{ url_for('auth.login') }}" class="fw-bold text-primary text-decoration-none ms-1">
+              Sign In
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
